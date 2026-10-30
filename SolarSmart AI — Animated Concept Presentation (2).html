@@ -1,0 +1,179 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>SolarSmart AI — Animated Concept Presentation</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f3f4f6;--t:#111827;--m:#4b5563;--c:#fff;--b:#d1d5db;--a:#b45309}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b1020;--t:#e5e7eb;--m:#9ca3af;--c:#111827;--b:#1f2937;--a:#fbbf24}}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--t);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:14px;padding:12px 14px 6px;overflow:hidden}
+#vz{min-width:0;display:flex;align-items:flex-start;justify-content:center}
+canvas{display:block;width:100%;max-width:calc((100vh - 150px)*1.6);aspect-ratio:8/5;background:#0f172a;border:1px solid var(--b);border-radius:10px}
+#pn{min-width:0;overflow:auto;background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px 16px}
+h2{margin:0 0 8px;font-size:22px}#ro{font:14px/1.5 ui-monospace,Consolas,monospace;color:var(--a);white-space:pre-wrap;margin-bottom:8px;min-height:1.5em}
+.s{padding:5px 10px;margin:6px 0;border-left:3px solid var(--b);color:var(--m);overflow-wrap:anywhere}.s.cur{border-color:var(--a);color:var(--t);background:rgba(245,158,11,.08)}
+.b{position:relative;padding-left:17px;margin:3px 0;font-size:17px;line-height:1.42}.b::before{content:"\2022";position:absolute;left:3px;color:var(--a);font-weight:700}.b b{color:var(--t)}
+.s h3{margin:2px 0 4px;font-size:17px;letter-spacing:.02em;text-transform:uppercase;color:var(--a)}
+.eq{display:block;margin:6px 0;padding:6px 10px;border-left:3px solid #f59e0b;background:rgba(245,158,11,.16);color:var(--t);font:17px ui-monospace,Consolas,monospace;overflow-wrap:anywhere}
+#bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--b);background:var(--c)}
+button{background:var(--bg);color:var(--t);border:1px solid var(--b);border-radius:6px;padding:6px 11px;cursor:pointer;font:inherit;font-size:14px}button.pp{min-width:104px;font-weight:600}
+#pg{flex:1;min-width:120px;height:8px;background:var(--b);border-radius:4px;overflow:hidden}#pi{display:block;height:100%;width:0;background:#f59e0b}
+#ct,#ps{font-size:13px;color:var(--m);white-space:nowrap}#ps b{color:var(--a)}label{font-size:13px;color:var(--m)}
+@media(max-width:900px){main{grid-template-columns:1fr;overflow:auto}canvas{max-width:100%}#pn{overflow:visible}body{height:auto;min-height:100%}}
+</style></head><body>
+<main><div id="vz"><canvas id="cv"></canvas></div><div id="pn"><h2 id="h"></h2><div id="ro"></div><div id="sl"></div></div></main>
+<div id="bar"><button id="b1" title="Previous slide (←)">⏮ Slide</button><button id="b2" title="Previous step (↑)">◀ Step</button><button id="bp" class="pp" title="Play / pause (Space)"></button><button id="br" title="Restart (R)">↺ Restart</button><button id="b3" title="Next step (↓)">Step ▶</button><button id="b4" title="Next slide (→)">Slide ⏭</button><div id="pg" title="Animation progress"><i id="pi"></i></div><span id="ct"></span><span id="ps"></span><label><input type="checkbox" id="au"> Autoplay</label><button id="bf" title="Fullscreen (F)">⛶ Fullscreen</button></div>
+<script>
+const $=i=>document.getElementById(i),c=$("cv"),x=c.getContext("2d"),R=Math.PI/180,sm=u=>{u=Math.max(0,Math.min(1,u));return u*u*(3-2*u)};
+const Y="#fbbf24",C="#22d3ee",B="#1e40af",G="#94a3b8",PK="#f472b6",GR="#4ade80",BL="#60a5fa";
+function rs(){const w=c.clientWidth,d=window.devicePixelRatio||1;c.width=Math.round(w*d);c.height=Math.round(w*d/1.6);x.setTransform(c.width/800,0,0,c.width/800,0,0)}new ResizeObserver(rs).observe(c);
+const LAT=13.08,LON=80.27,TZ=5.5,DOY=295;
+function sun(h){const b=360/365*(DOY-81)*R,eot=9.87*Math.sin(2*b)-7.53*Math.cos(b)-1.5*Math.sin(b),d=23.45*R*Math.sin(360/365*(284+DOY)*R),w=15*(h+(4*(LON-15*TZ)+eot)/60-12)*R,p=LAT*R,E=-Math.cos(d)*Math.sin(w),N=Math.cos(p)*Math.sin(d)-Math.sin(p)*Math.cos(d)*Math.cos(w),U=Math.sin(p)*Math.sin(d)+Math.cos(p)*Math.cos(d)*Math.cos(w),el=Math.asin(U)/R;let dni=0,dhi=0;if(U>0){const am=1/(U+.50572*Math.pow(6.07995+el,-1.6364)),dc=1353*Math.pow(.7,Math.pow(am,.678));dni=dc*.85;dhi=dc*.13}return{E,N,U,el,az:(Math.atan2(E,N)/R+360)%360,dni,dhi}}
+function pa(s,tl,az){const b=tl*R,g=az*R,sb=Math.sin(b),c=s.E*sb*Math.sin(g)+s.N*sb*Math.cos(g)+s.U*Math.cos(b);return{c,g:s.dni*Math.max(0,c)+s.dhi*(1+Math.cos(b))/2+.2*(s.dni*Math.max(s.U,0)+s.dhi)*(1-Math.cos(b))/2}}
+const P=(s,tl,az)=>{if(s.U<=0)return 0;const g=pa(s,tl,az).g;return Math.min(400,400*g/1000*Math.max(0,1-.004*(32+.03125*g-25)))};
+const H0=[];for(let i=0;i<=48;i++)H0.push(6+i*.25);const S=H0.map(sun),pF=S.map(s=>P(s,13,180)),pT=S.map(s=>P(s,90-s.el,s.az)),pS=[];
+for(let b=0;b<48;b+=4){let best=-1,bp;for(let t=0;t<=90;t+=10)for(let a=0;a<360;a+=15){const q=[0,1,2,3].map(k=>P(S[b+k],t,a)),e=q[0]+q[1]+q[2]+q[3];if(e>best){best=e;bp=q}}pS.push(...bp)}pS.push(pF[48]);
+const en=a=>a.reduce((u,v)=>u+v,0)*.25/1000,TL=[0,10,20,30,40,50,60,70,80,90],E10=TL.map(t=>en(S.map(s=>P(s,t,180)))),Emax=Math.max(...E10),Eb=E10.indexOf(Emax);
+const Ph=[];for(let i=0;i<12;i++)Ph.push(pF[i*4]/1000);const E1=Ph.reduce((a,b)=>a+b,0),E15=pF.slice(0,48).reduce((a,b)=>a+b/1000*.25,0);
+const hh=h=>{const m=Math.round(h*60);return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")};
+function arr(a,b,c1,d,col,w=3){x.strokeStyle=x.fillStyle=col;x.lineWidth=w;x.beginPath();x.moveTo(a,b);x.lineTo(c1,d);x.stroke();const g=Math.atan2(d-b,c1-a);x.beginPath();x.moveTo(c1,d);x.lineTo(c1-12*Math.cos(g-.4),d-12*Math.sin(g-.4));x.lineTo(c1-12*Math.cos(g+.4),d-12*Math.sin(g+.4));x.fill()}
+function tx(s,a,b,col="#e5e7eb",sz=15,al="left"){x.fillStyle=col;x.font=sz+"px system-ui,sans-serif";x.textAlign=al;x.fillText(s,a,b)}
+function pan(cx,cy,deg,L=150){x.save();x.translate(cx,cy);x.rotate(deg*R);x.fillStyle=B;x.fillRect(-L/2,-6,L,12);x.strokeStyle=BL;x.lineWidth=2;x.strokeRect(-L/2,-6,L,12);x.restore()}
+const disc=(a,b,r,col)=>{x.fillStyle=col;x.beginPath();x.arc(a,b,r,0,7);x.fill()},arc=(cx,cy,r,a,b,col,w=3)=>{x.strokeStyle=col;x.lineWidth=w;x.beginPath();x.arc(cx,cy,r,a,b);x.stroke()},gnd=w=>{x.fillStyle="#14532d";x.fillRect(0,395,w,105)};
+function ax(x0,y0,w,h,ym,xl="time of day (h)",yl="power (kW)"){x.strokeStyle=G;x.lineWidth=1.5;x.beginPath();x.moveTo(x0,y0-h);x.lineTo(x0,y0);x.lineTo(x0+w,y0);x.stroke();const st=w>400?3:6;for(let k=6;k<=18;k+=st)tx(k+":00",x0+(k-6)/12*w,y0+20,G,14,"center");[0,.5,1].forEach(q=>{tx((q*ym).toFixed(2),x0-6,y0-q*h+5,G,13,"right");if(q){x.strokeStyle="#1e293b";x.lineWidth=1;x.beginPath();x.moveTo(x0,y0-q*h);x.lineTo(x0+w,y0-q*h);x.stroke()}});tx(xl,x0+w/2,y0+46,G,14,"center");tx(yl,x0,y0-h-12,G,14);return{X:v=>x0+(v-6)/12*w,Y:v=>y0-v/ym*h}}
+function crv(m,a,col,f,fill){const n=Math.floor(f*48);if(n<1)return;x.beginPath();for(let i=0;i<=n;i++)x[i?"lineTo":"moveTo"](m.X(H0[i]),m.Y(a[i]/1000));x.strokeStyle=col;x.lineWidth=3;x.stroke();if(fill){x.lineTo(m.X(H0[n]),m.Y(0));x.lineTo(m.X(6),m.Y(0));x.fillStyle=col+"55";x.fill()}}
+let I=0,st=0,pr=0,pl=false,clk=0,hold=0,key="";const v=k=>st>k?1:st==k?pr:0,T=(t,d=2.2,pg=0)=>[t,d,pg],q=s=>`<span class="eq">${s}</span>`,D=[];
+const MP=()=>{const m=ax(70,430,700,360,.4);return m};
+D[0]={t:"SolarSmart AI",s:[T(["<b>Sun:</b> rises above a solar panel."],3),T(["<b>Sunlight:</b> rays reach the panel surface."],2),T(["<b>Panel:</b> turns light into electricity (flowing dots).","<b>SolarSmart AI:</b> solar-panel optimization using mathematics."],3)],r:()=>"",d(){const r=sm(v(0)),sx=720-170*r,sy=380-250*r,px=300,py=372;disc(sx,sy,30,Y);gnd(800);x.globalAlpha=v(1);x.strokeStyle=Y;x.lineWidth=2;for(let k=-2;k<=2;k++){x.beginPath();x.moveTo(sx-26,sy+k*12);x.lineTo(px+k*30,py-10);x.stroke()}x.globalAlpha=1;pan(px,py,25,170);x.globalAlpha=v(2);x.strokeStyle=C;x.lineWidth=3;x.beginPath();x.moveTo(px,py+10);x.lineTo(px,450);x.lineTo(px+300,450);x.stroke();for(let i=0;i<8;i++){const w=(clk*90+i*46)%360,a=w<78?px:px+w-78,b=w<78?py+10+w:450;disc(a,b,4,C)}disc(px+330,450,16,Y);x.globalAlpha=1}};
+const fOf=()=>st==0?.08:st==1?.08+.92*pr:st==2?pr:st==3?.55:.08;
+D[1]={t:"The problem with fixed panels",s:[
+T(["A <b>fixed panel</b> stays in the same orientation (13° tilt, facing south).","<b>Cyan arrow:</b> the panel's normal vector."],1.5),
+T(["The <b>sun</b> moves from east to west.","The <b>sunlight angle</b> changes throughout the day.","<b>Readout cos θ:</b> 1 means sunlight hits the panel head-on."],6),
+T(["<b>Power curve:</b> rises in the morning, peaks near midday, falls in the evening."],6),
+T(["<b>Better alignment</b> (faint tilted panel) can increase the direct sunlight captured.","<b>Real gains</b> depend on location, weather, shading and tracking strategy."],2)],
+r(){const k=Math.round(fOf()*48),s=S[k];return `time ${hh(H0[k])}  elevation ${Math.max(0,s.el).toFixed(0)}°\ncos θ (fixed panel) ${s.U>0?pa(s,13,180).c.toFixed(2):"–"}\npower ${st>=2?pF[k].toFixed(0)+" W":"–"}`},
+d(){gnd(440);const cx=210,cy=390,k=Math.round(fOf()*48),s=S[k];if(s.U>0){const sx=cx-s.E*190,sy=cy-s.U*300;if(st>=1){x.setLineDash([6,5]);x.strokeStyle=Y;x.lineWidth=2;x.beginPath();x.moveTo(sx,sy);x.lineTo(cx,cy-8);x.stroke();x.setLineDash([])}disc(sx,sy,17,Y);if(st>=3){x.globalAlpha=.45*v(3);pan(cx,cy,Math.atan2(-s.E,s.U)/R,130);x.globalAlpha=1}}pan(cx,cy,0,130);arr(cx,cy-8,cx,cy-90,C);tx("East",20,430,"#cbd5e1",14);tx("West",430,430,"#cbd5e1",14,"right");tx("fixed panel + normal",cx,60,G,14,"center");const m=ax(490,430,290,300,.4);if(st>=2){crv(m,pF,BL,v(2));disc(m.X(H0[k]),m.Y(pF[k]/1000),6,Y)}}};
+const PN=["User inputs","Solar geometry","Math model","Power estimate","Optimization","Results"],PO=["lat, lon, date","elevation, azimuth","cos θ, irradiance","P(t) in W","best tilt / azimuth","kWh, charts"];
+D[2]={t:"Our proposed solution",s:[
+T(["<b>1 · User inputs:</b> location, date, panel tilt and azimuth, efficiency, shading, adjustment settings."],1.4),
+T(["<b>2 · Solar geometry:</b> sun elevation and azimuth from date, time and place."],1.4),
+T(["<b>3 · Math model:</b> angle of incidence, then direct + diffuse + ground-reflected irradiance."],1.4),
+T(["<b>4 · Power estimate:</b> P(t) with efficiency, temperature and shading terms, capped at rated power."],1.4),
+T(["<b>5 · Optimization:</b> compare fixed, scheduled (grid search + dynamic programming) and ideal tracking."],1.4),
+T(["<b>6 · Results:</b> energy in kWh, charts, comparison table and validation checks."],1.4)],r:()=>"",
+d(){PN.forEach((n,i)=>{const a=15+i*132,o=v(i);x.fillStyle=o>.5?"#f59e0b":"#1e293b";x.fillRect(a,190,115,80);const w=n.split(" ");w.forEach((z,j)=>tx(z,a+57,225+(w.length>1?j*20-10+8:8),o>.5?"#111":"#cbd5e1",15,"center"));if(i<5)arr(a+117,230,a+131,230,G,2);x.globalAlpha=o;PO[i].split(", ").forEach((z,j)=>tx(z,a+57,300+j*18,"#fff",14,"center"));x.globalAlpha=1})}};
+const gb=()=>st==4?20+25*Math.sin(2*Math.PI*pr):20,ge=()=>st==5?50+20*Math.sin(2*Math.PI*pr):50;
+D[3]={t:"Understanding solar geometry",s:[
+T(["<b>Panel tilt (β):</b> measured from horizontal."],1.2),
+T(["<b>Normal vector (n):</b> perpendicular to the panel surface (cyan)."],1.5),
+T(["<b>Sunlight direction:</b> points toward the sun (yellow).","<b>Elevation (e):</b> angle above the horizon (dashed arc)."],1.5),
+T(["<b>Angle (θ):</b> between sunlight direction and normal (pink arc).","<b>Smaller θ:</b> more direct light on the panel."],1.5),
+T(["<b>Tilt the panel:</b> β changes, sun fixed, so θ changes."],5),
+T(["<b>Sun climbs:</b> e changes, panel fixed, so θ changes again."],5),
+T(["<b>Solar azimuth:</b> compass bearing of the sun (0° N, 90° E, 180° S, 270° W).","<b>Panel azimuth:</b> compass direction the panel faces.","<b>Side view:</b> this is the N–S plane, so azimuths point in or out of the screen."],.6,1)],
+r:()=>{const b=gb(),e=ge();return `tilt β = ${b.toFixed(0)}°\nsun elevation e = ${e.toFixed(0)}°\nθ = |90° − e − β| = ${Math.abs(90-e-b).toFixed(0)}°`},
+d(){const cx=330,cy=380,b=gb(),e=ge(),z=90-e,A1=(-90+b)*R,A2=(-90+z)*R;x.strokeStyle=G;x.lineWidth=2;x.beginPath();x.moveTo(40,cy);x.lineTo(660,cy);x.stroke();tx("N",50,cy+24,G,15);tx("S",650,cy+24,G,15);x.globalAlpha=v(0);pan(cx,cy,b,170);x.globalAlpha=1;if(st>=1)arr(cx,cy,cx+150*v(1)*Math.cos(A1),cy+150*v(1)*Math.sin(A1),C);if(st>=2){const o=v(2);arr(cx,cy,cx+210*o*Math.cos(A2),cy+210*o*Math.sin(A2),Y);disc(cx+260*Math.cos(A2),cy+260*Math.sin(A2),16*o,Y);x.setLineDash([4,4]);arc(cx,cy,115,-e*R*o,0,Y,1.5);x.setLineDash([]);tx("e",cx+125,cy-8,Y,15)}if(st>=3)arc(cx,cy,85,Math.min(A1,A2),Math.min(A1,A2)+Math.abs(A2-A1)*v(3),PK);if(st>=3)tx("θ",cx+(95*Math.cos((A1+A2)/2)),cy+95*Math.sin((A1+A2)/2),PK,17,"center");tx("n",cx+165*Math.cos(A1),cy+165*Math.sin(A1)-6,C,16)}};
+const th6=()=>st<=5?35:st==6?(()=>{const p=pr;return p<.1?35*(1-sm(p/.1)):p<.33?0:p<.5?60*sm((p-.33)/.17):p<.67?60:p<.83?60+30*sm((p-.67)/.16):90})():(()=>{return 90-55*sm(pr)})();
+D[4]={t:"Vectors and the dot product",s:[
+T(["<b>Solar panel:</b> receives incoming sunlight."],1.5),
+T(["<b>Sun vector (s):</b> points toward the sun."],1.5),
+T(["<b>Normal vector (n):</b> perpendicular to the panel."],1.5),
+T(["<b>Angle (θ):</b> the angle between the two vectors."],1.5),
+T(["<b>Dot product:</b> measures their alignment.",q("s · n = |s||n| cos θ")],1),
+T(["<b>Key idea:</b> for unit vectors, |s| = |n| = 1, so",q("s · n = cos θ")],1),
+T(["<b>θ = 0°:</b> cos θ = 1 (full alignment).","<b>θ = 60°:</b> cos θ = 0.5.","<b>θ = 90°:</b> cos θ = 0 (no direct light)."],9),
+T(["<b>Limitation:</b> cos θ is only the direct-light alignment factor, not electrical power.","<b>Also matter:</b> irradiance, area, efficiency, diffuse light, temperature."],2.5,1)],
+r:()=>{const t=th6(),n=[Math.sin(t*R),Math.cos(t*R)];return `θ = ${t.toFixed(0)}°\ns = (0, 1)   n = (${n[0].toFixed(2)}, ${n[1].toFixed(2)})\ns · n = ${n[1].toFixed(2)} = cos ${t.toFixed(0)}°`},
+d(){const cx=250,cy=390,t=th6(),cs=Math.cos(t*R);if(st>=0){x.globalAlpha=.6*v(0);x.strokeStyle=Y;x.lineWidth=1.5;for(let k=-3;k<=3;k++){x.beginPath();x.moveTo(cx+k*45,cy-300);x.lineTo(cx+k*45,cy-30);x.stroke()}x.globalAlpha=1}x.globalAlpha=Math.min(1,v(0)*2);pan(cx,cy,t,170);x.globalAlpha=1;if(st>=1){arr(cx,cy,cx,cy-230*v(1),Y);tx("s",cx+12,cy-235*v(1),Y,18)}if(st>=2){const L=230*v(2);arr(cx,cy,cx+L*Math.sin(t*R),cy-L*Math.cos(t*R),C);tx("n",cx+L*Math.sin(t*R)+10,cy-L*Math.cos(t*R),C,18)}if(st>=3)arc(cx,cy,90,-Math.PI/2,-Math.PI/2+t*R*Math.max(v(3),st>3?1:0),PK);if(st>=3)tx("θ",cx+55*Math.sin(t*R/2)+8,cy-55*Math.cos(t*R/2)-22,PK,17);
+if(st>=5){tx("cos θ",560,70,"#fff",16)}if(st>=6){tx("alignment factor cos θ",540,130,"#fff",15);x.fillStyle="#334155";x.fillRect(540,145,240,24);x.fillStyle=Y;x.fillRect(540,145,240*Math.max(0,cs),24);tx(Math.max(0,cs).toFixed(2),780,200,Y,18,"right");[[0,"θ = 0°  →  1.00"],[60,"θ = 60°  →  0.50"],[90,"θ = 90°  →  0.00"]].forEach((z,i)=>tx(z[1],540,260+i*34,Math.abs(t-z[0])<2?Y:G,17))}}};
+const th5=()=>st==1?60*sm(pr):st==2?60-40*sm(pr):st>=3?20:0;
+D[5]={t:"From alignment to electrical power",s:[
+T(["<b>Direct irradiance G:</b> 800 W/m² (illustrative example value)."],1.5),
+T(["<b>Turn the panel away:</b> θ grows.","<b>Effective irradiance</b> falls as θ grows:",q("G_eff = G · cos θ")],4),
+T(["<b>Panel area A:</b> 2 m². <b>Efficiency η:</b> 0.20.","<b>Panel turns back</b> toward the sun, so power rises.",q("P ≈ G_eff · A · η")],4),
+T([q("P(t) ≈ G_effective(t) · A · η"),"<b>P:</b> power. <b>G_effective:</b> irradiance on the panel.","<b>Dashboard:</b> G_effective is the full plane-of-array irradiance (direct + diffuse + ground-reflected), then temperature and shading terms, capped at rated power."] ,1,1)],
+r:()=>{const t=th5(),g=800*Math.cos(t*R);return `θ = ${t.toFixed(0)}°  cos θ = ${Math.cos(t*R).toFixed(2)}\nG_eff = ${g.toFixed(0)} W/m²\nP = ${g.toFixed(0)}×2×0.20 = ${(g*.4).toFixed(0)} W`},
+d(){const t=th5(),c0=Math.cos(t*R),cx=130,cy=380;pan(cx,cy,t,120);arr(cx,cy,cx,cy-170,Y);arr(cx,cy,cx+170*Math.sin(t*R),cy-170*c0,C);arc(cx,cy,60,-Math.PI/2,(-90+t)*R,PK);tx("s",cx+10,cy-175,Y,16);tx("n",cx+175*Math.sin(t*R),cy-175*c0-6,C,16);
+const rows=[["Direct irradiance G (800 W/m²)",800,"W/m²",800,0],["Effective G·cos θ",800*c0,"W/m²",800,1],["Power P ≈ G_eff·A·η  (A = 2 m², η = 0.20)",320*c0,"W",400,2]];rows.forEach((r,i)=>{const o=i==0?v(0):i==1?(st>=1?1:0):(st>=2?v(2):0);x.globalAlpha=o;const y=90+i*130;tx(r[0],300,y,"#e5e7eb",15);x.fillStyle="#334155";x.fillRect(300,y+12,380,28);x.fillStyle=[Y,"#f59e0b",GR][i];x.fillRect(300,y+12,380*r[1]/r[3],28);tx(r[1].toFixed(0)+" "+r[2],690,y+33,"#fff",15);x.globalAlpha=1})}};
+const bt=()=>60-55*sm(st==5?pr:0),pt=[],yv=(()=>{const s=sun(10);for(let i=0;i<=90;i++)pt.push(P(s,i,180));return s})(),ym7=Math.max(...pt)*1.05,X7=u=>70+u/90*700,Y7=u=>430-u/ym7*340;
+D[6]={t:"Partial derivatives and sensitivity",s:[
+T(["<b>Curve:</b> estimated power versus panel tilt β.","<b>One moment:</b> 10:00, panel azimuth 180°, synthetic clear sky."],3),
+T(["<b>Pick a tilt angle:</b> β = 60°."],1.2),
+T(["<b>Mark the point</b> on the curve: P(60°)."],1.2),
+T(["<b>Slope indicator:</b> a tangent-like line at that point."],1.5),
+T(["<b>Sensitivity:</b> change in power per degree of tilt, other variables held fixed.",q("∂P/∂β ≈ [P(β+1°) − P(β−1°)] / 2°")],1.2),
+T(["<b>Positive slope:</b> power rises with tilt.","<b>Negative slope:</b> power falls with tilt.","<b>Near zero:</b> close to a peak."],6,1)],
+r:()=>{const b=bt(),s=sun(10),p=P(s,b,180),sl=(P(s,b+1,180)-P(s,b-1,180))/2;return st<2?"β: not selected yet":`β = ${b.toFixed(0)}°   P = ${p.toFixed(0)} W\n`+(st>=4?`slope ≈ ${sl.toFixed(2)} W/°  → ${sl>.1?"rising with tilt":sl<-.1?"falling with tilt":"near a peak (≈ flat)"}`:"slope: not computed yet")},
+d(){x.strokeStyle=G;x.lineWidth=1.5;x.beginPath();x.moveTo(70,80);x.lineTo(70,430);x.lineTo(770,430);x.stroke();[0,30,60,90].forEach(u=>tx(u+"°",X7(u),452,G,14,"center"));tx("panel tilt β (°)",420,482,G,14,"center");tx("estimated power P (W)",70,60,G,14);[0,.5,1].forEach(f=>tx((f*ym7/1.05).toFixed(0),62,430-f*ym7/1.05/ym7*340+5,G,13,"right"));
+const n=Math.floor(v(0)*90);x.beginPath();for(let i=0;i<=n;i++)x[i?"lineTo":"moveTo"](X7(i),Y7(pt[i]));x.strokeStyle=BL;x.lineWidth=3;x.stroke();if(st<1)return;const b=bt(),s=sun(10),p=P(s,b,180),sl=(P(s,b+1,180)-P(s,b-1,180))/2;x.setLineDash([5,5]);x.strokeStyle=G;x.lineWidth=1;x.beginPath();x.moveTo(X7(b),430);x.lineTo(X7(b),Y7(p));x.stroke();x.setLineDash([]);tx("β = "+b.toFixed(0)+"°",X7(b),474,Y,15,"center");if(st>=2)disc(X7(b),Y7(p),7*Math.max(v(2),st>2?1:0),PK);if(st>=3){const ps=sl*(340/ym7)/(700/90),L=110*(st>3?1:v(3));x.strokeStyle=Y;x.lineWidth=2.5;x.beginPath();x.moveTo(X7(b)-L,Y7(p)+ps*L);x.lineTo(X7(b)+L,Y7(p)-ps*L);x.stroke()}}};
+const ex=[0,1,2,3,4,5,6,7,8,9];
+D[7]={t:"Optimization explained visually",s:[
+T(["<b>Candidate tilts:</b> 0°, 10°, …, 90°.","<b>Fixed:</b> panel azimuth 180°, whole-day model."],1.5),
+T(["<b>Evaluate each candidate:</b> the model estimates the day's energy (kWh)."],6),
+T([`<b>Best tested tilt:</b> β = ${TL[Eb]}° (${Emax.toFixed(2)} kWh), under the model's assumptions.`],1.5),
+T(["<b>Local best:</b> better than its neighbours.","<b>Best tested:</b> best among the candidates tried.","<b>Global optimum:</b> needs a proof or an exhaustive search."],1,1)],
+r:()=>st>=1?`tested ${Math.min(10,Math.floor(v(1)*10+(st>1?10:0)))} / 10 candidates`+(st>=2?`\nbest tested: ${TL[Eb]}°  ${Emax.toFixed(3)} kWh`:""):"",
+d(){x.strokeStyle=G;x.lineWidth=1.5;x.beginPath();x.moveTo(60,430);x.lineTo(780,430);x.stroke();tx("daily energy (kWh) for each tested tilt",70,60,G,14);tx("panel tilt β",420,484,G,14,"center");TL.forEach((tl,i)=>{const a=70+i*72,g=Math.max(0,Math.min(1,v(1)*10-i+(st>1?10:0))),h=330*E10[i]/Emax*g;x.strokeStyle="#334155";x.lineWidth=1;x.strokeRect(a,100,52,330);x.fillStyle=st>=2&&i==Eb?GR:B;x.fillRect(a,430-h,52,h);tx(tl+"°",a+26,454,G,14,"center");if(g>=1)tx(E10[i].toFixed(2),a+26,422-h,"#fff",13,"center")})}};
+const lg=(a,b)=>{tx("● "+a,70,40,BL,15);if(b)tx("● "+b,330,40,GR,15)};
+D[8]={t:"Power versus time",s:[
+T(["<b>Horizontal axis:</b> time of day (h).","<b>Vertical axis:</b> estimated power (kW).","<b>Sky:</b> synthetic clear sky."],1.2),
+T(["<b>Fixed panel</b> (13° tilt, south): rises in the morning, peaks near midday, falls in the evening."],6),
+T(["<b>Ideal two-axis tracking:</b> a theoretical upper bound under the same model, not a real system."],5),
+T(["<b>Morning:</b> elevation and irradiance increase.","<b>Midday:</b> power approaches its daily maximum.","<b>Evening:</b> available sunlight decreases."],6,1)],
+r:()=>{const f=st==1?pr:st>=2?1:0,k=Math.round(f*48);return st>=1?`time ${hh(H0[k])}  fixed ${(pF[k]/1000).toFixed(3)} kW`+(st>=2?`  tracking ${(pT[k]/1000).toFixed(3)} kW`:""):""},
+d(){const m=MP();lg("Fixed (13°, south)",st>=2?"Ideal tracking":"");if(st==3){const o=Math.min(2.99,pr*3)|0,b=[[6,10,"Morning"],[10,14,"Midday"],[14,18,"Evening"]];b.forEach((z,i)=>{if(i<=o){x.fillStyle="rgba(251,191,36,.12)";x.fillRect(m.X(z[0]),70,m.X(z[1])-m.X(z[0]),360);tx(z[2],(m.X(z[0])+m.X(z[1]))/2,100,Y,16,"center")}})}const f=st==1?pr:st>=2?1:0;crv(m,pF,BL,f);if(st>=2)crv(m,pT,GR,st==2?pr:1);if(st>=1){const k=Math.round(f*48);disc(m.X(H0[k]),m.Y(pF[k]/1000),6,Y)}}};
+const ik=()=>st>=2&&st<=13?st-2:-1;
+function iE(){let E=0,txt="";if(st>=14){const n=st==14?Math.floor(pr*48):48;for(let i=0;i<n;i++)E+=pF[i]/1000*.25;return[E,`Δt = 15 min: ${n} slices\nΣ P·Δt = ${E.toFixed(3)} kWh`+(st>=15?`\n(1-hour slices gave ${E1.toFixed(3)} kWh)`:"")]}const k=st-2;if(k<0)return[0,"Σ P·Δt = 0.000 kWh"];const last=Math.min(11,k);for(let i=0;i<last;i++)E+=Ph[i];const cur=st>13?1:pr,done=st>13?12:k;if(st>13){E=E1;return[E,`Δt = 1 h: Σ P·Δt = ${E.toFixed(3)} kWh`]}E+=Ph[k]*cur;return[E,`slice ${k+1}/12  ${hh(6+k)}–${hh(7+k)}: ${Ph[k].toFixed(3)} kW × 1 h = ${(Ph[k]).toFixed(3)} kWh\nrunning total = ${E.toFixed(3)} kWh`]}
+const IS=[T(["<b>Power P(t):</b> the rate of energy generation, in kW.","<b>Curve:</b> fixed panel, synthetic sky."],3),T(["<b>Time:</b> split into 1-hour slices, Δt = 1 h."],1.5),T(["<b>First slice (06:00–07:00):</b> a rectangle of height P and width Δt.","<b>Area P·Δt:</b> the energy in that hour (kW × h = kWh)."],1),T([],.9)];for(let i=0;i<10;i++)IS.push(T("",.9));
+IS.push(T(["<b>Narrower rectangles</b> (Δt = 15 min) follow the curve more closely.","<b>Result:</b> a more accurate sum."],4,1),T(["<b>Integration:</b> adds the energy generated over time.","<b>Limit Δt → 0:</b> shade the whole area under the curve."],2),T([q("E_day = ∫ P(t) dt"),"<b>Window:</b> 06:00–18:00 (night power is zero; a full day would use 0–24 h)."],1),T([q("E_day ≈ Σ Pᵢ Δt"),"<b>Power</b> in kW, <b>Δt</b> in hours."],1),T(["<b>Total energy:</b> measured in kWh.","<b>Power × time = energy.</b>"],1));
+D[9]={t:"Integration: from power to energy",s:IS,r:()=>iE()[1],
+d(){const m=MP();crv(m,pF,BL,v(0));if(st>=1){x.setLineDash([3,5]);x.strokeStyle=G;x.lineWidth=1;for(let k=0;k<=Math.floor(v(1)*12+(st>1?12:0));k++){x.beginPath();x.moveTo(m.X(6+k),430);x.lineTo(m.X(6+k),400);x.stroke()}x.setLineDash([])}
+const rc=(i,d,p,h)=>{const a=m.X(6+i*d),w=m.X(6+(i+1)*d)-a;x.fillStyle="rgba(251,191,36,.5)";x.strokeStyle=Y;x.lineWidth=1;x.fillRect(a,m.Y(p*h),w,m.Y(0)-m.Y(p*h));x.strokeRect(a,m.Y(p*h),w,m.Y(0)-m.Y(p*h))};
+if(st>=15){x.beginPath();for(let i=0;i<=48;i++)x[i?"lineTo":"moveTo"](m.X(H0[i]),m.Y(pF[i]/1000));x.lineTo(m.X(18),m.Y(0));x.lineTo(m.X(6),m.Y(0));x.fillStyle=`rgba(251,191,36,${.35*(st==15?pr:1)})`;x.fill();x.strokeStyle=BL;x.lineWidth=3;x.stroke();tx("area under the curve = energy (kWh)",m.X(8),m.Y(.07),"#fff",15)}
+else if(st>=14){const n=Math.floor(pr*48);for(let i=0;i<n;i++)rc(i,.25,pF[i]/1000,1)}else for(let i=0;i<12;i++){const o=st>i+2?1:st==i+2?pr:0;if(o>0)rc(i,1,Ph[i],o)}}};
+const sa=[["<b>Same day, same synthetic sky,</b> same assumptions for all three strategies."],["<b>Fixed panel:</b> 13° tilt, facing south.","<b>Shaded area:</b> its daily energy."],["<b>Scheduled optimization:</b> orientation re-optimized each hour.","<b>Simplification here:</b> movement cost ignored; the dashboard includes movement cost and an adjustment limit."],["<b>Ideal tracking:</b> the panel normal points at the sun, a theoretical upper bound."],["<b>Compare areas, not peaks:</b> a higher peak does not mean more daily energy.","<b>Model outputs</b> for one synthetic day, not measurements."]];
+D[10]={t:"Comparing energy strategies",s:sa.map((a,i)=>T(a,i==0?1:4)),r:()=>{const eF=en(pF),eS=en(pS),eT=en(pT);return st<1?"":`Fixed      ${eF.toFixed(2)} kWh`+(st>=2?`\nScheduled  ${eS.toFixed(2)} kWh  (${(100*(eS-eF)/eF).toFixed(1)} %)`:"")+(st>=3?`\nTracking   ${eT.toFixed(2)} kWh  (${(100*(eT-eF)/eF).toFixed(1)} %)`:"")},
+d(){const m=MP();tx("● Fixed",70,40,BL,15);if(st>=2)tx("● Scheduled (hourly)",200,40,PK,15);if(st>=3)tx("● Ideal tracking",440,40,GR,15);crv(m,pF,BL,v(1),1);if(st>=2)crv(m,pS,PK,v(2),1);if(st>=3)crv(m,pT,GR,v(3),1)}};
+const s10=sun(10),base=P(s10,13,180),fac=[.96,1.03,.99,1.05,.97],FN=[["sun elevation",s10.el.toFixed(0)+"°"],["sun azimuth",s10.az.toFixed(0)+"°"],["panel tilt","13°"],["panel azimuth","180°"],["DNI",s10.dni.toFixed(0)+" W/m²"],["DHI",s10.dhi.toFixed(0)+" W/m²"]];
+D[11]={t:"AI and machine learning",s:[
+T(["<b>Input features</b> at 10:00: sun elevation, sun azimuth, panel tilt, panel azimuth, DNI, DHI."],1.5),
+T(["<b>Same features</b> enter every decision tree.","<b>Random Forest:</b> 20 trees in the dashboard; five are drawn."],2.5),
+T(["<b>Each tree</b> outputs its own prediction ŷᵢ.","<b>Per-tree values</b> here are illustrative."],5),
+T(["<b>Forest average</b> gives the final estimate.","<b>Physics-model value</b> is shown for comparison."],2)],r:()=>"",
+d(){FN.forEach((f,i)=>{x.fillStyle="#1e293b";x.globalAlpha=Math.max(.3,v(0));x.fillRect(15,30+i*72,170,58);tx(f[0],25,52+i*72,G,14);tx(f[1],25,78+i*72,"#fff",18);x.globalAlpha=1});let sum=0,n=0;fac.forEach((f,i)=>{const a=290+i*88;x.globalAlpha=v(1);x.strokeStyle="#475569";x.lineWidth=1;x.beginPath();x.moveTo(185,250);x.lineTo(a,200);x.stroke();x.globalAlpha=1;const on=st>2||(st==2&&pr*5>i);x.fillStyle=on?GR:"#1e293b";if(st>=1){x.beginPath();x.moveTo(a,190);x.lineTo(a-34,280);x.lineTo(a+34,280);x.fill();tx("tree "+(i+1),a,270,on?"#111":G,13,"center")}if(on){const p=base*f;sum+=p;n++;tx("ŷ="+p.toFixed(0)+" W",a,308,"#fff",14,"center")}});if(st>=3&&n==5){x.fillStyle="#f59e0b";x.fillRect(680,210,105,90);tx("average",732,238,"#111",15,"center");tx((sum/5).toFixed(0)+" W",732,272,"#111",22,"center");tx("physics: "+base.toFixed(0)+" W",732,324,G,14,"center")}tx("Illustrative per-tree outputs, synthetic training data",290,470,G,14)}};
+const DB=["Inputs","Sun path","Power curves","Cumulative energy","Validation"];
+D[12]={t:"Live dashboard demonstration",s:[
+T(["<b>Live demonstration:</b> one input changed at a time.","<b>Predict first,</b> then watch what changes."],1),
+T(["<b>Change date or latitude:</b> observe how the calculated sun path changes."],1),
+T(["<b>Change panel tilt:</b> compare the fixed-panel power curve and energy."],1),
+T(["<b>Change adjustment settings:</b> observe the scheduled strategy."],1),
+T(["<b>Read cumulative energy:</b> compare total energy generated."],1),
+T(["<b>Check validation:</b> review the model's validation results and ML error metrics."],1)],r:()=>"",
+d(){DB.forEach((n,i)=>{const a=10+i*154,o=v(i+1)>.5;x.fillStyle=o?"#f59e0b":"#1e293b";x.fillRect(a,190,134,80);const w=n.split(" ");w.forEach((z,j)=>tx(z,a+67,225+(w.length>1?j*20-10+8:8),o?"#111":"#cbd5e1",15,"center"));if(i<4)arr(a+136,230,a+152,230,G,2)});tx("Guided demo: predict the change first, then change the input.",400,360,G,16,"center")}};
+D[13]={t:"Limitations and future improvements",s:[
+T(["<h3>Implemented</h3>","<b>Solar-position</b> calculation.","<b>Synthetic clear-sky</b> irradiance model.","<b>Power and energy</b> estimation.","<b>Panel-strategy</b> comparison.","<b>Grid-search optimization</b> and dynamic programming.","<b>Random Forest</b> trained on synthetic data."],1.5,1),
+T(["<h3>Current limitations</h3>","<b>No live weather</b> data.","<b>No validation</b> against physical solar-panel measurements.","<b>Ideal tracking</b> is a model benchmark, not a demonstrated hardware system.","<b>Results are estimates,</b> not proof of real-world energy savings."],1.5,1),
+T(["<h3>Future improvements</h3>","<b>Live weather</b> integration.","<b>Real solar-panel</b> measurements.","<b>More realistic</b> environmental effects.","<b>Motorized</b> solar tracking."],1.5,1)],r:()=>"",
+d(){const cols=[["Implemented","#14532d","#4ade80",["Solar position","Clear-sky irradiance","Power and energy","Strategy comparison","Grid search + DP","Random Forest (synthetic)"],"✓ "],["Current limitations","#7f1d1d","#f87171",["No live weather","No field validation","Tracking = benchmark","Estimates, not proof"],"• "],["Future improvements",null,"#fbbf24",["Live weather","Real measurements","Realistic environment","Motorized tracking"],"→ "]];
+cols.forEach((k,i)=>{const X=15+i*262;x.globalAlpha=Math.max(.22,v(i));if(k[1]){x.fillStyle=k[1];x.fillRect(X,60,245,380)}else{x.setLineDash([8,6]);x.strokeStyle="#f59e0b";x.lineWidth=2;x.strokeRect(X,60,245,380);x.setLineDash([])}tx(k[0],X+122,100,k[2],19,"center");k[3].forEach((z,j)=>tx(k[4]+z,X+16,160+j*45,"#fff",16));x.globalAlpha=1})}};
+const tb=(s,a,b,col,sz,f)=>{x.fillStyle=col;x.font=f+" "+sz+"px "+(f.indexOf("italic")>=0?"Georgia,'Times New Roman',serif":"system-ui,'Segoe UI',sans-serif");x.textAlign="center";x.fillText(s,a,b)};
+const brightBg=()=>{let g=x.createLinearGradient(0,0,0,395);g.addColorStop(0,"#38bdf8");g.addColorStop(.6,"#bae6fd");g.addColorStop(1,"#fef3c7");x.fillStyle=g;x.fillRect(0,0,800,395);g=x.createRadialGradient(400,110,10,400,110,260);g.addColorStop(0,"rgba(255,255,255,.85)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,800,395);x.strokeStyle="#fbbf24";x.lineWidth=4;x.lineCap="round";for(let k=0;k<16;k++){const a=k*Math.PI/8;x.beginPath();x.moveTo(400+48*Math.cos(a),110+48*Math.sin(a));x.lineTo(400+68*Math.cos(a),110+68*Math.sin(a));x.stroke()}x.lineCap="butt";disc(400,110,36,"#fbbf24");arc(400,110,36,0,7,"#f59e0b",3);x.fillStyle="#22c55e";x.fillRect(0,395,800,105);x.fillStyle="#16a34a";x.fillRect(0,395,800,8);pan(400,380,13,190)};
+D.unshift({t:"SolarSmart AI",u:1,s:[T(["<h3>SolarSmart AI</h3>","<b>Presented by:</b> Keerthana Asok","<b>Registration No.:</b> 26BCE0971"],1)],r:()=>"",
+d(){brightBg();tb("SolarSmart AI",400,225,"#0c2a5c",58,"italic 700");tb("Solar-panel optimization using mathematics",400,262,"#1e40af",20,"500");tb("Keerthana Asok",400,310,"#9a3412",30,"700");tb("Registration No.: 26BCE0971",400,340,"#0f172a",19,"600")}});
+D.push({t:"Thank you",u:1,s:[T(["<h3>Thank you</h3>","<b>SolarSmart AI</b>","Keerthana Asok · 26BCE0971"],1)],r:()=>"",
+d(){brightBg();tb("Thank you",400,230,"#0c2a5c",68,"italic 700");tb("SolarSmart AI",400,268,"#1e40af",24,"600");tb("Keerthana Asok · 26BCE0971",400,314,"#9a3412",24,"700")}});
+function blk(t){return(Array.isArray(t)?t:[t]).map(p=>p.startsWith('<span class="eq"')||p.startsWith("<h3")?p:`<div class="b">${p}</div>`).join("")}
+function go(){key=I+":"+st;$("h").textContent=D[I].u?D[I].t:I+". "+D[I].t;let h="",last=-1,from=0;D[I].s.forEach((s,i)=>{if(i<=st&&s[0].length)last=i;if(i<=st&&s[2])from=i});D[I].s.forEach((s,i)=>{if(i>=from&&i<=st&&s[0].length)h+=`<div class="s${i==last?" cur":""}" ${i==last?'id="cur"':""}>${blk(s[0])}</div>`});$("sl").innerHTML=h;const e=$("cur");if(e)e.scrollIntoView({block:"nearest"});$("pn").scrollTop=0;if(e)e.scrollIntoView({block:"nearest"})}
+const N=()=>D[I].s.length;
+function nstep(){if(st<N()-1){st++;pr=0;pl=true;go()}else if(pr<1)pl=true}
+function pstep(){if(st>0){st--;pr=1;pl=false;go()}else{pr=0;pl=false}}
+function tog(){if(pl)pl=false;else if(pr<1)pl=true;else nstep()}
+function rst(){st=0;pr=0;pl=true;go()}
+function slide(d){I=(I+d+D.length)%D.length;st=0;pr=0;pl=false;go()}
+function fs(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+[["b1",()=>slide(-1)],["b2",pstep],["bp",tog],["br",rst],["b3",nstep],["b4",()=>slide(1)],["bf",fs]].forEach(a=>{const b=$(a[0]);b.addEventListener("mousedown",e=>e.preventDefault());b.addEventListener("click",()=>{a[1]();b.blur()})});
+$("au").addEventListener("change",e=>e.target.blur());
+addEventListener("keydown",e=>{const g=e.target,tg=g.tagName;if(tg=="TEXTAREA"||tg=="SELECT"||(tg=="INPUT"&&g.type!="checkbox"))return;const k=e.key;if(k=="ArrowLeft")slide(-1);else if(k=="ArrowRight")slide(1);else if(k==" ")tog();else if(k=="r"||k=="R")rst();else if(k=="ArrowUp")pstep();else if(k=="ArrowDown")nstep();else if(k=="f"||k=="F")fs();else return;e.preventDefault()});
+let lt=performance.now(),lr="";
+function loop(now){const dt=Math.min(.1,(now-lt)/1000);lt=now;if(pl){clk+=dt;pr+=dt/D[I].s[st][1];if(pr>=1){pr=1;pl=false;hold=1.2}}else if($("au").checked&&pr>=1&&st<N()-1){hold-=dt;if(hold<=0)nstep()}
+x.fillStyle="#0f172a";x.fillRect(0,0,800,500);try{D[I].d();const r=D[I].r();if(r!==lr){$("ro").textContent=r;lr=r}}catch(e){tx("Error: "+e.message,20,40,"#f87171",16)}
+const n=N(),done=st==n-1&&pr>=1;$("pi").style.width=(100*(st+pr)/n)+"%";$("ct").textContent=`Slide ${I+1}/${D.length} · Step ${st+1}/${n}`;$("ps").innerHTML=pl?"<b>● Playing</b>":done?"<b>✓ End of slide</b>":pr>=1?"<b>❚❚ Step complete — your turn</b>":(st==0&&pr==0)?"<b>❚❚ Ready (paused)</b>":"<b>❚❚ Paused</b>";$("bp").textContent=pl?"❚❚ Pause":done?"✓ Done":pr>=1?"▶ Next step":(st==0&&pr==0)?"▶ Play":"▶ Resume";requestAnimationFrame(loop)}
+go();rs();requestAnimationFrame(loop);
+</script></body></html>
